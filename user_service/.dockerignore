@@ -1,0 +1,36 @@
+# Node.js artifacts
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+*.log.*
+
+# OS veya IDE dosyaları
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Build / derlenmiş dosyalar
+dist
+build
+.tmp
+coverage
+
+# Docker dosyaları (opsiyonel, eğer copy etmeyeceksen)
+Dockerfile
+docker-compose.yml
+
+# Diğer gereksiz dosyalar
+*.md
+.git
+.gitignore

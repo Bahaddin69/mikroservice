@@ -1,0 +1,4 @@
+POST http://localhost:8000/products/add
+Content-Type: application/json
+
+{"name":"Test Product","description":"This is a test product","price":19.99,"stock":100}

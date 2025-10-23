@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "es2016",
+        "sourceMap": true,
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "jsx": "react-jsx",
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "noImplicitAny": false,
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "include": [
+        "src/**/*"
+    ]
+}

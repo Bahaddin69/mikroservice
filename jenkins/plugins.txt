@@ -1,0 +1,28 @@
+# --- GIT & GITHUB PLUGINLERİ ---
+git
+github
+github-branch-source
+
+# --- PIPELINE PLUGINLERİ ---
+workflow-aggregator
+pipeline-model-definition
+pipeline-github-lib
+pipeline-stage-view
+pipeline-build-step
+
+# --- CREDENTIALS & SECURITY ---
+credentials
+plain-credentials
+credentials-binding
+
+# --- DOCKER DESTEĞİ ---
+docker-workflow
+
+# --- ARAYÜZ / BLUE OCEAN ---
+blueocean
+
+# --- DİĞER TEMELLER ---
+git-client
+ssh-credentials
+matrix-auth
+token-macro

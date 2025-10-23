@@ -1,0 +1,197 @@
+services:
+    zookeeper:
+        image: confluentinc/cp-zookeeper:latest
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+        ports:
+            - "2181:2181"
+
+    kafka:
+        image: confluentinc/cp-kafka:6.2.1
+        depends_on:
+            - zookeeper
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+
+            KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092"
+            KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+            KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        ports:
+            - "9092:9092"
+            - "29092:29092"
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+        container_name: elasticsearch
+        environment:
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+            - xpack.security.transport.ssl.enabled=false
+            - node.name=elasticsearch
+            - bootstrap.memory_lock=true
+            - ES_JAVA_OPTS=-Xms1g -Xmx1g
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - esdata:/usr/share/elasticsearch/data
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+
+    catalog_db_server:
+        image: "postgres:14.0"
+        ports:
+            - "5432:5432"
+        deploy:
+            mode: replicated
+            replicas: 1
+        environment:
+            POSTGRES_USER: catalog_db
+            POSTGRES_PASSWORD: catalog_db_password
+            POSTGRES_DB: catalog_service
+        volumes:
+            - ./db-data/catalog_db_server/:/var/lib/postgresql/data
+
+    order_db_server:
+        image: "postgres:14.0"
+        ports:
+            - "5433:5432"
+        deploy:
+            mode: replicated
+            replicas: 1
+        environment:
+            POSTGRES_USER: order_db
+            POSTGRES_PASSWORD: order_db_password
+            POSTGRES_DB: order_service
+        volumes:
+            - ./db-data/order_db_server/:/var/lib/postgresql/data
+
+    user_db_server:
+        image: "postgres:14.0"
+        ports:
+            - "5442:5432"
+        deploy:
+            mode: replicated
+            replicas: 1
+        environment:
+            POSTGRES_USER: user_db
+            POSTGRES_PASSWORD: user_db_password
+            POSTGRES_DB: user_service
+        volumes:
+            - ./db-data/user_db_server/:/var/lib/postgresql/data
+    catalog_service:
+        build:
+            context: ./catalog_service
+            dockerfile: Dockerfile
+        container_name: catalog_service
+        environment:
+            - NODE_ENV=development
+            - APP_PORT=9001
+            - CATALOG_BASE_URL=http://catalog_service:9001
+            - DATABASE_URL=postgresql://catalog_db:catalog_db_password@catalog_db_server:5432/catalog_service?schema=public
+            - CLIENT_ID=catalog-service
+            - GROUP_ID=catalog-service-group
+            - BROKER_1=kafka:9092
+            - ELASTICSEARCH_URL=http://elasticsearch:9200
+        ports:
+            - "9001:9001"
+        depends_on:
+            - kafka
+            - elasticsearch
+            - catalog_db_server
+
+    order_service:
+        build:
+            context: ./order_service
+            dockerfile: Dockerfile
+        container_name: order_service
+        environment:
+            - NODE_ENV=development
+            - APP_PORT=9002
+            - DATABASE_URL=postgresql://order_db:order_db_password@order_db_server:5432/order_service
+            - CATALOG_BASE_URL=http://catalog_service:9001
+            - CLIENT_ID=order-service
+            - GROUP_ID=order-service-group
+            - BROKER_1=kafka:9092
+            - AUTH_SERVICE_BASE_URL=http://user_service:9000
+        ports:
+            - "9002:9002"
+        depends_on:
+            - kafka
+            - order_db_server
+
+    user_service:
+        build:
+            context: ./user_service
+            dockerfile: Dockerfile
+        container_name: user_service
+        environment:
+            - NODE_ENV=development
+            - DATABASE_URL=postgresql://user_db:user_db_password@user_db_server:5432/user_service?schema=public
+            - JWT_SECRET=user_serice_secret
+            - JWT_EXPIRES_IN=1d
+            - PORT=9000
+        ports:
+            - "9000:9000"
+        depends_on:
+            - user_db_server
+
+    payment_service:
+        build:
+            context: ./payment_service
+            dockerfile: Dockerfile
+        container_name: payment_service
+        env_file:
+            - ./payment_service/.env
+        environment:
+            - APP_PORT=9003
+            - ORDER_SERVICE_BASE_URL=http://order_service:9002
+            - AUTH_SERVICE_BASE_URL=http://user_service:9000
+            - CLIENT_ID=order-service
+            - GROUP_ID=order-service-group
+            - BROKER_1=kafka:9092
+
+        ports:
+            - "9003:9003"
+
+    payment_frontend:
+        build:
+            context: ./payment_frontend
+            dockerfile: Dockerfile
+        container_name: payment_frontend
+        environment:
+            - AUTH_BASE_URL=http://user_service:9000
+            - ORDER_BASE_URL=http://order_service:9002
+            - PAYMENT_BASE_URL=http://payment_service:9003
+        ports:
+            - "3000:80"
+        restart: unless-stopped
+
+    email_service:
+        build:
+            context: ./email_service
+            dockerfile: Dockerfile
+        container_name: email_service
+        env_file:
+            - ./email_service/.env
+        environment:
+            - APP_PORT=9005
+            - GMAIL_USER=bahaddinkumru7@gmail.com
+            - GMAIL_APP_PASSWORD=efepepe0
+            - BROKER_1=kafka:9092
+            - GROUP_ID=email-service-group
+            - CLIENT_ID=email-service
+        ports:
+            - "9005:9005"
+        depends_on:
+            - kafka
+
+volumes:
+    esdata:
+        driver: local
