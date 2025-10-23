@@ -60,19 +60,7 @@ Amaç, ürün yönetimi, sipariş, ödeme, kullanıcı ve e-posta servislerinin 
 ## 🧰 Kurulum ve Çalıştırma
 
 ```bash
-# 1. Depoyu klonla
-git clone https://github.com/<kullanıcı-adın>/<repo-adın>.git
-cd <repo-adın>
+# 1. Depoyu klonla veya indir
 
 # 2. Docker servislerini başlat (Kafka, PostgreSQL, vb.)
-docker-compose up -d
-
-# 3. Her servisi başlat
-cd catalog_service && yarn dev
-cd order_service && yarn dev
-cd user_service && yarn dev
-cd payment_service && yarn dev
-cd email_service && yarn dev
-
-# 4. Frontend'i başlat
-cd payment-frontend && yarn dev
+docker compose up -d --build
