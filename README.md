@@ -62,5 +62,5 @@ Amaç, ürün yönetimi, sipariş, ödeme, kullanıcı ve e-posta servislerinin 
 ```bash
 # 1. Depoyu klonla veya indir
 
-# 2. Docker servislerini başlat
+# 2. Docker servislerini build et ve başlat
 docker compose up -d --build
