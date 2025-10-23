@@ -62,5 +62,5 @@ Amaç, ürün yönetimi, sipariş, ödeme, kullanıcı ve e-posta servislerinin 
 ```bash
 # 1. Depoyu klonla veya indir
 
-# 2. Docker servislerini başlat (Kafka, PostgreSQL, vb.)
+# 2. Docker servislerini başlat
 docker compose up -d --build
