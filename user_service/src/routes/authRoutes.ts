@@ -80,4 +80,17 @@ router.get("/validate", async (req: Request, res: Response) => {
     }
 });
 
+router.get('/user/:id', async (req: Request, res: Response) => {
+    const userId = Number(req.params.id);
+    const user = await userRepository.findOne(userId);
+
+    try {
+        if (!user) return new Error("user not found");
+        return res.status(200).json({ data: user });
+    } catch (error) {
+        console.error("Kullanıcı çekilirken hata:", error);
+        return res.status(500).json({ message: "Sunucu hatası." });
+    }
+});
+
 export default router;

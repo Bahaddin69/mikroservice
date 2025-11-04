@@ -18,6 +18,16 @@ export const GetProductDetails = async (productId: number) => {
     }
 };
 
+export const GetUserDetails = async (customerId: number) => {
+    try {
+        const response = await axios.get(`${AUTH_SERVICE_BASE_URL}/auth/user/${customerId}`)
+        return response.data;
+    } catch (error) {
+        logger.error(error);
+        throw new NotFoundError("user not found");
+    }
+};
+
 export const GetStockDetails = async (ids: number[]) => {
     try {
         const response = await axios.post(`${CATALOG_BASE_URL}/products/stock`, {
@@ -33,7 +43,6 @@ export const GetStockDetails = async (ids: number[]) => {
 export const validateUser = async (token: string) => {
 
     try {
-        // axios.defaults.headers.common["Authorization"] = token;
         const response = await axios.get(`${AUTH_SERVICE_BASE_URL}/auth/validate`, {
             headers: {
                 Authorization: token

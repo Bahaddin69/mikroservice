@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const AUTH_BASE_URL = "http://localhost:9000";
-const ORDER_BASE_URL = "http://localhost:9002";
-const PAYMENT_BASE_URL = "http://localhost:9003";
+const AUTH_BASE_URL = "http://localhost/api";
+const ORDER_BASE_URL = "http://localhost/api";
+const PAYMENT_BASE_URL = "http://localhost/api/payments";
 
 export const loginApi = async (credentials) => {
     try {

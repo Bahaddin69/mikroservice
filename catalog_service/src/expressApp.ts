@@ -11,7 +11,7 @@ app.use(httpLogger);
 const elasticSearchService = new ElasticSearchService();
 AppEventListener.instance.listen(elasticSearchService);
 
-app.use("/", catalogRouter);
+app.use("/api/catalog", catalogRouter);
 
 app.use(HandleErrorWithLogger);
 

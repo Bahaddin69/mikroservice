@@ -1,0 +1,43 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum CargoStatus {
+    PREPARING // Hazırlanıyor
+    SHIPPED // Yola Çıktı
+    DELIVERED // Teslim Edildi
+    CANCELLED // İptal Edildi
+}
+
+model Cargo {
+    id                    Int    @id @default(autoincrement())
+    order_number          String
+    customer_id           Int
+    email                 String
+    total_unique_products Int
+    total_qty             Int
+
+    items CargoItem[]
+
+    status CargoStatus @default(PREPARING)
+
+    tracking_number String @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model CargoItem {
+    id        Int    @id @default(autoincrement())
+    cargo_id  Int
+    item_name String
+    total_qty Int
+
+    cargo Cargo @relation(fields: [cargo_id], references: [id], onDelete: Cascade)
+}

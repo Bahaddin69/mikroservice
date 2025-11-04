@@ -32,7 +32,7 @@ router.get('/orders', RequestAuthorizer, async (req: Request, res: Response, nex
     return res.status(200).json(response);
 });
 
-router.get('/order/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/orders/:id', async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (!user) {
         next(new Error("user not found"));
@@ -43,14 +43,14 @@ router.get('/order/:id', async (req: Request, res: Response, next: NextFunction)
     return res.status(200).json(response);
 });
 
-router.patch('/order/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/orders/:id', async (req: Request, res: Response, next: NextFunction) => {
     const orderId = parseInt(req.params.id);
     const status = req.body.status as OrderStatus;
     const response = await service.UpdateOrder(orderId, status, repo);
     return res.status(200).json(response);
 });
 
-router.delete('/order/:id', RequestAuthorizer, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/orders/:id', RequestAuthorizer, async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (!user) {
         next(new Error("user not found"));

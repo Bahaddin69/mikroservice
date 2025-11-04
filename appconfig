@@ -1,0 +1,10 @@
+npm init --y
+yarn add express
+yarn add nodemon -D
+yarn add typescript ts-node @types/node --save-dev
+npm i --save-dev @types/express
+yarn add prisma -D
+yarn add @prisma/client
+npx prisma init --datasource-provider postgresql
+yarn add dotenv
+yarn add kafkajs

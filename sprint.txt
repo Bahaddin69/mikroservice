@@ -1,0 +1,13 @@
+enum CargoStatus {
+    PREPARING // Hazırlanıyor
+    SHIPPED // Yola Çıktı
+    DELIVERED // Teslim Edildi
+    CANCELLED // İptal Edildi
+}
+
+
+1) baba kargo yola çıktığında kullanıcıya bir email gidecek
+
+2) baba kargo teslim edildiğinde kullanıcıya bir email gidecek
+
+3) eğer iptal edilirse email gidecek

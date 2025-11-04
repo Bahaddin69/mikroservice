@@ -4,6 +4,14 @@ import { OrderWithLineItems } from "../dto/orderRequest.dto";
 import { eq } from "drizzle-orm";
 import { OrderStatus } from "../types";
 
+export type OrderStats = {
+    orderNumber: number;
+    totalUniqueProducts: number;
+    totalQty: number;
+    totalLines: number;
+    itemStats: Record<string, { totalQty: number; count: number }>;
+};
+
 export type OrderRepositoryType = {
     createOrder: (lineItem: OrderWithLineItems) => Promise<number>;
     findOrder: (id: number) => Promise<OrderWithLineItems | null>;
@@ -11,6 +19,7 @@ export type OrderRepositoryType = {
     updateOrder: (id: number, status: string, txnId?: string) => Promise<OrderWithLineItems>;
     deleteOrder: (id: number) => Promise<boolean>;
     findOrdersByCustomerId: (customerId: number) => Promise<OrderWithLineItems[]>;
+    getOrderStatsByNumber: (orderNumber: number) => Promise<OrderStats>;
 };
 
 const createOrder = async (lineItem: OrderWithLineItems): Promise<number> => {
@@ -41,7 +50,6 @@ const createOrder = async (lineItem: OrderWithLineItems): Promise<number> => {
 
     return id;
 };
-
 
 const findOrder = async (id: number): Promise<OrderWithLineItems | null> => {
     const order = await DB.query.orders.findFirst({
@@ -104,6 +112,40 @@ const findOrderByNumber = async (orderNumber: number): Promise<OrderWithLineItem
     return order as unknown as OrderWithLineItems;
 }
 
+const getOrderStatsByNumber = async (orderNumber: number): Promise<OrderStats> => {
+    const order = await DB.query.orders.findFirst({
+        where: eq(orders.orderNumber, orderNumber),
+        with: {
+            lineItems: true,
+        },
+    });
+
+    if (!order) throw new Error("Order not found");
+
+    const items = order.lineItems || [];
+
+    const itemStats = items.reduce((acc: Record<string, { totalQty: number; count: number }>, item) => {
+        const key = item.itemName;
+        if (!acc[key]) acc[key] = { totalQty: 0, count: 0 };
+        acc[key].totalQty += Number(item.qty);
+        acc[key].count += 1;
+        return acc;
+    }, {});
+
+    const totalUniqueProducts = Object.keys(itemStats).length;
+    const totalQty = items.reduce((s, i) => s + Number(i.qty), 0);
+    const totalLines = items.length;
+
+    return {
+        orderNumber,
+        totalUniqueProducts,
+        totalQty,
+        totalLines,
+        itemStats,
+    };
+};
+
+
 export const OrderRepository: OrderRepositoryType = {
     createOrder,
     findOrder,
@@ -111,4 +153,5 @@ export const OrderRepository: OrderRepositoryType = {
     findOrdersByCustomerId,
     updateOrder,
     deleteOrder,
+    getOrderStatsByNumber
 };
