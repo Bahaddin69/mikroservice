@@ -1,0 +1,86 @@
+_format_version: "3.0"
+
+services:
+  - name: catalog_service
+    url: http://catalog_service:9001
+    routes:
+      - name: catalog_service_route
+        paths:
+          - /api/catalog
+        strip_path: false
+        path_handling: v1
+
+  - name: cargo_service
+    url: http://cargo_service:9006
+    routes:
+      - name: cargo_service_route
+        paths:
+          - /api/cargos
+        strip_path: false
+        path_handling: v1
+
+  - name: order_service
+    url: http://order_service:9002
+    routes:
+      - name: order_service_route
+        paths:
+          - /api/orders
+          - /api/cart
+        strip_path: false
+        path_handling: v1
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["jwt"]
+          cookie_names: ["jwt"]
+
+  - name: payment_frontend
+    url: http://payment_frontend:80
+    routes:
+      - name: payment_frontend_route
+        paths:
+          - /
+        strip_path: false
+        path_handling: v1
+
+  - name: payment_service
+    url: http://payment_service:9003
+    routes:
+      - name: payment_service_route
+        paths:
+          - /api/payments
+        strip_path: false
+        path_handling: v1
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["jwt"]
+          cookie_names: ["jwt"]
+
+  - name: user_service
+    url: http://user_service:9000
+    routes:
+      - name: user_public_route
+        paths:
+          - /api/auth
+          - /api/auth/login
+        strip_path: false
+        path_handling: v1
+
+      - name: user_private_route
+        paths:
+          - /api/auth/profile
+        strip_path: false
+        path_handling: v1
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names: ["jwt"]
+              cookie_names: ["jwt"]
+
+consumers:
+  - username: authenticated_user
+    jwt_secrets:
+      - algorithm: HS256
+        key: user-service
+        secret: user_service_secret

@@ -13,7 +13,11 @@ const userRepository = new UserRepository();
 const userService = new UserService(userRepository);
 
 const generateToken = (user: JWTPayload): string => {
-    return jwt.sign(user, process.env.JWT_SECRET as string, { expiresIn: process.env.JWT_EXPIRES_IN });
+    return jwt.sign(
+        { ...user, iss: "user-service" },
+        process.env.JWT_SECRET as string,
+        { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
 }
 
 router.post('/register', async (req: Request, res: Response) => {
@@ -47,7 +51,6 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 });
 
-// buraya yarın test edilecek
 router.post('/login', async (req: Request, res: Response) => {
 
     const { email, password }: LoginRequestDTO = req.body;

@@ -12,7 +12,7 @@ export const CreateCart = async (input: CartRequestInput & { customerId: number 
         throw new NotFoundError("product is out stock");
 
     const lineItem = await repo.findCartByProductId(input.customerId, input.productId);
-    if (lineItem)
+    if (lineItem)   
         return repo.updateCart(lineItem.id, lineItem.qty + input.qty);
 
     return await repo.createCart(input.customerId, {

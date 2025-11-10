@@ -8,3 +8,4 @@ yarn add @prisma/client
 npx prisma init --datasource-provider postgresql
 yarn add dotenv
 yarn add kafkajs
+unberalla
