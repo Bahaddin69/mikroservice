@@ -44,4 +44,17 @@ export const PublishSendEmailEvent = async (data: any) => {
         headers: {},
         message: data
     });
+
+    console.log("email event publish edildi", data);
+};
+
+export const PublishSendCargoEvent = async (data: any) => {
+    await MessageBroker.publish({
+        event: OrderEvent.SEND_CARGO,
+        topic: "CargoEvents",
+        headers: {},
+        message: data
+    })
+
+    console.log("cargo event publish edildi", data);
 };

@@ -2,7 +2,8 @@ import { InProcessOrder, OrderLineItemType, OrderWithLineItems } from "../dto/or
 import { CartRepositoryType } from "../repository/cart.repository";
 import { OrderRepository, OrderRepositoryType } from "../repository/order.repository";
 import { MessageType, OrderEvent, OrderStatus } from "../types";
-import { SendCreateOrderMessage, PublishSendEmailEvent, SendOrderCanceledMessage } from "./broker.service";
+import { GetUserDetails, NotFoundError } from "../utils";
+import { SendCreateOrderMessage, PublishSendEmailEvent, SendOrderCanceledMessage, PublishSendCargoEvent } from "./broker.service";
 
 export const CreateOrder = async (userId: number, repo: OrderRepositoryType, cartRepo: CartRepositoryType) => {
 
@@ -107,23 +108,89 @@ export const HandleSubcription = async (message: MessageType) => {
             const txnId = data.data.paymentLog.id;
             console.log("paymentId", txnId);
 
-            if (!txnId) throw new Error("paymentId not found");
+            if (!txnId) throw new NotFoundError("paymentId not found");
 
             if (status === "succeeded") {
+
+                const emailResponse = await GetUserDetails(response.customerId);
+
+                const email = emailResponse?.data?.email || emailResponse?.email || emailResponse;
+
+                if (!email) throw new Error("user email not found");
+
+                console.log("kullanıcı siparişleri ve email bilgisi", email)
+
                 await OrderRepository.updateOrder(Number(response.id), OrderStatus.SUCCEEDED, txnId);
+
                 console.log("sipariş durumu güncellendi");
-                const resultLog = await PublishSendEmailEvent({
+
+                await PublishSendEmailEvent({
                     orderNumber: response.orderNumber,
                     customerId: response.customerId,
-                    email: "bahaddinkumru7@gmail.com"
-
-                    // burada kullanıcının sipariş ettiği ürün listesine gerek var mı
+                    email: email
                 });
 
-                console.log("email event gönderildi", resultLog);
+                const orderStats = await OrderRepository.getOrderStatsByNumber(orderNumber);
+
+                await PublishSendCargoEvent({
+                    customerId: response.customerId,
+                    email: email,
+                    orderStats
+                });
+
             } else {
                 await OrderRepository.updateOrder(Number(response.id), OrderStatus.FAILED, txnId);
                 console.log("sipariş durumu başarısız olarak güncellendi");
+            }
+
+        } catch (error) {
+            console.log("sipariş bulunamadı", error);
+            return;
+        }
+    }
+
+    if (event === OrderEvent.SEND_EMAIL_CARGO_STATUS) {
+        console.log("baba hüseyin gelmiş hoşgelmiş babaaaaa", data);
+
+        const { orderNumber, status } = data;
+
+        try {
+            const response = await OrderRepository.findOrderByNumber(orderNumber);
+
+            if (!response) throw new NotFoundError("sipariş bulunamadı");
+
+            console.log("response", response);
+
+            const { id } = response;
+
+            const orderId = Number(id);
+
+            if (status === OrderStatus.PREPARING) {
+                console.log("baba siparişi hazırlamaya almış");
+
+                const update = await OrderRepository.updateOrder(orderId, OrderStatus.PREPARING);
+                console.log("başarıyla sipariş durumu güncellendi", update);
+            }
+
+            if (status === OrderStatus.SHIPPED) {
+                console.log("baba siparişi hazırlamaya almış");
+
+                const update = await OrderRepository.updateOrder(orderId, OrderStatus.SHIPPED);
+                console.log("başarıyla sipariş durumu güncellendi", update);
+            }
+
+            if (status === OrderStatus.DELIVERED) {
+                console.log("baba siparişi hazırlamaya almış");
+
+                const update = await OrderRepository.updateOrder(orderId, OrderStatus.DELIVERED);
+                console.log("başarıyla sipariş durumu güncellendi", update);
+            }
+
+            if (status === OrderStatus.CANCELLED) {
+                console.log("baba siparişi iptallemişler");
+
+                const update = await OrderRepository.updateOrder(orderId, OrderStatus.CANCELLED);
+                console.log("başarıyla sipariş durumu güncellendi", update);
             }
 
         } catch (error) {

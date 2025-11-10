@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { loginApi } from "../services/api";
 
 export default function LoginForm() {
-    const [email, setEmail] = useState("test@test.com");
+    const [email, setEmail] = useState("bahaddinkumru7@gmail.com");
     const [password, setPassword] = useState("123456");
 
     // const [error, setError] = useState("");

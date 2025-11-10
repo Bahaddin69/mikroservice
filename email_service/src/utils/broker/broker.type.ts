@@ -19,6 +19,6 @@ export type MessageBrokerType = {
     // consumer
     connectConsumer: <T>() => Promise<T>; // Consumer bağlantısını açar ve instance döner
     disconnectConsumer: () => Promise<void>; // Consumer bağlantısını kapatır
-    subscribe: (messageHandler: MessageHandler, topic: TOPIC_TYPE) => Promise<void>; // Belirtilen topic'e abone olup mesajları dinler
+    subscribe: (messageHandler: MessageHandler, topic: TOPIC_TYPE[]) => Promise<void>; // Belirtilen topic'e abone olup mesajları dinler
 }
 

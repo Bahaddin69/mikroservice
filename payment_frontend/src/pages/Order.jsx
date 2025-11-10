@@ -59,7 +59,7 @@ const Order = () => {
                 await createPayment(response.data.orderNumber);
             }
         } catch (error) {
-            console.error("place order failed:", error);
+            throw error.response || error;
         }
     };
 

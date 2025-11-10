@@ -13,7 +13,7 @@ export const ExpressApp = async () => {
 
     await InitalizeBroker();
 
-    app.use(paymentRoutes);
+    app.use("/api/payments/", paymentRoutes);
 
     app.use('/', (req: Request, res: Response, _: NextFunction) => {
         res.status(200).json({ msg: "i am healthy !" });

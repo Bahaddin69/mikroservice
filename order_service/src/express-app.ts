@@ -14,8 +14,8 @@ export const ExpressApp = async () => {
 
     await InitalizeBroker();
 
-    app.use(orderRoutes);
-    app.use(cartRoutes);
+    app.use("/api/", orderRoutes);
+    app.use("/api/", cartRoutes);
 
     app.use('/', (req: Request, res: Response, _: NextFunction) => {
         return res.status(200).json({ msg: "i am healthy !" });

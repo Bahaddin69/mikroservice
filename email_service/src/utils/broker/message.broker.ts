@@ -104,14 +104,14 @@ const disconnectConsumer = async (): Promise<void> => {
 // Consumer ile topic'e abone olur ve mesajları işler
 const subscribe = async (
     messageHandler: MessageHandler,
-    topic: TOPIC_TYPE
+    topic: TOPIC_TYPE[]
 ): Promise<void> => {
     const consumer = await connectConsumer<Consumer>();
-    await consumer.subscribe({ topic: topic, fromBeginning: true });
+    await consumer.subscribe({ topics: topic, fromBeginning: true });
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            if (topic !== "OrderEvents") {
+            if (topic !== "OrderEvents" && topic !== "EmailEvents") {
                 return;
             }
 

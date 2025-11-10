@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 9000;
 
 app.use(express.json());
 
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 app.listen(PORT, () => {
     console.log(`SERVER is running on port ${PORT}`);

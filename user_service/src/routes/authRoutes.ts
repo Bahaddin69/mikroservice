@@ -13,7 +13,11 @@ const userRepository = new UserRepository();
 const userService = new UserService(userRepository);
 
 const generateToken = (user: JWTPayload): string => {
-    return jwt.sign(user, process.env.JWT_SECRET as string, { expiresIn: process.env.JWT_EXPIRES_IN });
+    return jwt.sign(
+        { ...user, iss: "user-service" },
+        process.env.JWT_SECRET as string,
+        { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
 }
 
 router.post('/register', async (req: Request, res: Response) => {
@@ -47,7 +51,6 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 });
 
-// buraya yarın test edilecek
 router.post('/login', async (req: Request, res: Response) => {
 
     const { email, password }: LoginRequestDTO = req.body;
@@ -77,6 +80,19 @@ router.get("/validate", async (req: Request, res: Response) => {
         return res.status(200).json({ ...user });
     } catch (error) {
         return res.status(403).json({ message: "Invalid token" });
+    }
+});
+
+router.get('/user/:id', async (req: Request, res: Response) => {
+    const userId = Number(req.params.id);
+    const user = await userRepository.findOne(userId);
+
+    try {
+        if (!user) return new Error("user not found");
+        return res.status(200).json({ data: user });
+    } catch (error) {
+        console.error("Kullanıcı çekilirken hata:", error);
+        return res.status(500).json({ message: "Sunucu hatası." });
     }
 });
 
